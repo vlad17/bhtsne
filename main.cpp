@@ -62,6 +62,26 @@ double L2(const Double10& d1, const Double10& d2) {
   return sq;
 }
 
+struct Img28x28 {
+  unsigned char pixels_[28 * 28];
+};
+
+double L2(const Img28x28& i1, const Img28x28& i2) {
+  double ret = 0;
+  for (int i = 0; i < 28 * 28; ++i) {
+    double x = i1.pixels_[i] - i2.pixels_[i];
+    ret += x * x;
+  }
+  return ret;
+}
+
+namespace std {
+  template<> class tuple_size<Img28x28> {
+  public:
+    static const size_t value = 28 * 28;
+  };
+}
+
 int main(int argc, const char* argv[]) {
   if (argc != 3) {
     std::cerr << "Usage: " << argv[0]
@@ -82,16 +102,17 @@ int main(int argc, const char* argv[]) {
   srand(0);
   //  std::cout << "Using random seed " << rand_seed << std::endl;
 
-  TSNE<Double10, L2> tsne;
+  TSNE<Img28x28, L2> tsne;
   int no_dims = 0, rand_seed = 0;
   double theta = 0, perplexity = 0;
 
   try {
-    std::cout << "Loading 10-tuples from " << infile << "..." << std::endl;
+    std::cout << "Loading 28x28-tuples from " << infile << "..." << std::endl;
     auto X = tsne.load_data(infile, &theta, &perplexity, &no_dims, &rand_seed);
 
     // Normalize
-    Double10 mean;
+    /*
+    Img28x28 mean;
     for (auto& x : X)
       for_each2(mean, x, [](double& m, double& d) { m += d; });
     for_each(mean, [&](double& m) { m /= X.size(); });
@@ -103,7 +124,7 @@ int main(int argc, const char* argv[]) {
       for_each(x, [&](double d) { max_X = std::max(max_X, fabs(d)); });
     for (auto& x : X)
       for_each(x, [&](double& d) { d /= max_X; });
-
+    */
     auto Y = tsne.run(std::move(X), no_dims, theta, perplexity);
     tsne.save_data(outfile, no_dims, Y);
 

@@ -460,7 +460,7 @@ template<typename Tuple, double (*Distance)(const Tuple&, const Tuple&)>
 std::vector<Tuple> TSNE<Tuple, Distance>::load_data(
     const std::string& filename, double* theta, double* perplexity,
     int* no_dims, int* rand_seed) {
-  std::ifstream in(filename, std::ios_base::binary);
+  std::ifstream in(filename, std::ios::binary);
   int nn, dd;
   int *n = &nn, *d = &dd;
   internal::read(in, n), internal::read(in, d), internal::read(in, theta);
@@ -486,13 +486,12 @@ void TSNE<Tuple, Distance>::save_data(const std::string& filename,
   std::cout << "Saving " << nrows << " x " << no_dims
             << " data matrix to " << filename << std::endl;
 
-  std::ofstream out(filename);
+  std::ofstream out(filename, std::ios::binary);
   int ctr = 0;
   for (int i = 0; i < nrows; ++i) {
     for (int j = 0; j < no_dims; ++j) {
-      out << Y[ctr++] << '\t';
+      out.write(reinterpret_cast<const char*>(&Y[ctr++]), sizeof (double));
     }
-    out << '\n';
   }
 }
 
