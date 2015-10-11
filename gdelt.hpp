@@ -9,9 +9,10 @@ struct DiffClass {
 };
 
 struct CategoryClass {
-  std::string value_;
+  int64_t value_; // hash of a string
   double distance(const CategoryClass& other) {
-    return value_ == other.value_;
+    if (value_ == 0 || other.value_ == 0) return 1;
+    return value_ != other.value_;
   }
 };
 
@@ -25,7 +26,11 @@ std::istream& operator>>(std::istream& in, DiffClass<T>& v) {
 }
 
 std::istream& operator>>(std::istream& in, CategoryClass& v) {
-  std::getline(in, v.value_, '\t');
+  in >> v.value_;
+  int last = in.get();
+  if (last != EOF && last != '\t')
+    throw std::invalid_argument("expected tab or EOF");
+  return in;
 }
 
 typedef DiffClass<int> DaysSinceEpoch;
