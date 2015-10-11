@@ -9,7 +9,7 @@ struct DiffClass {
 };
 
 struct CategoryClass {
-  int64_t value_; // hash of a string
+  int64_t value_; // hash of a string or other category
   double distance(const CategoryClass& other) {
     if (value_ == 0 || other.value_ == 0) return 1;
     return value_ != other.value_;
@@ -34,8 +34,8 @@ std::istream& operator>>(std::istream& in, CategoryClass& v) {
 }
 
 typedef DiffClass<int> DaysSinceEpoch;
-typedef DiffClass<int> EventCode;
-typedef DiffClass<int> QuadClass;
+typedef CategoryClass EventCode; // TODO needs custom distance
+typedef CategoryClass QuadClass;
 typedef DiffClass<double> GoldsteinScale;
 typedef CategoryClass Actor1Name;
 typedef CategoryClass Actor2Name;
