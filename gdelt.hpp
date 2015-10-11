@@ -8,9 +8,8 @@ struct DiffClass {
   }
 };
 
-template<typename T>
 struct CategoryClass {
-  T value_;
+  std::string value_;
   double distance(const CategoryClass& other) {
     return value_ == other.value_;
   }
@@ -18,28 +17,31 @@ struct CategoryClass {
 
 template<typename T>
 std::istream& operator>>(std::istream& in, DiffClass<T>& v) {
-  return in >> v.value_;
+  in >> v.value_;
+  int last = in.get();
+  if (last != EOF && last != '\t')
+    throw std::invalid_argument("expected tab or EOF");
+  return in;
 }
 
-template<typename T>
-std::istream& operator>>(std::istream& in, CategoryClass<T>& v) {
-  return in >> v.value_;
+std::istream& operator>>(std::istream& in, CategoryClass& v) {
+  std::getline(in, v.value_, '\t');
 }
 
 typedef DiffClass<int> DaysSinceEpoch;
 typedef DiffClass<int> EventCode;
 typedef DiffClass<int> QuadClass;
 typedef DiffClass<double> GoldsteinScale;
-typedef CategoryClass<std::string> Actor1Name;
-typedef CategoryClass<std::string> Actor2Name;
+typedef CategoryClass Actor1Name;
+typedef CategoryClass Actor2Name;
 typedef DiffClass<bool> IsRootEvent;
 typedef DiffClass<int> NumMentions;
 typedef DiffClass<int> NumSources;
 typedef DiffClass<int> NumArticles;
 typedef DiffClass<double> AvgTone;
-typedef CategoryClass<std::string> Actor1Geo;
-typedef CategoryClass<std::string> Actor2Geo;
-typedef CategoryClass<std::string> BaseURL;
+typedef CategoryClass Actor1Geo;
+typedef CategoryClass Actor2Geo;
+typedef CategoryClass BaseURL;
 
 typedef std::tuple<DaysSinceEpoch, EventCode, QuadClass,
                    GoldsteinScale, Actor1Name, Actor2Name,

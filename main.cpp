@@ -40,9 +40,6 @@
 template<std::size_t S>
 struct read_cell { void operator()(GDELTMini& m, std::istream& in) {
   in >> std::get<S>(m);
-  int last = in.get();
-  if (last != EOF && last != '\t')
-    throw std::invalid_argument("expected tab or EOF");
 }};
 
 std::istream& operator>>(std::istream& in, GDELTMini& gdm) {
