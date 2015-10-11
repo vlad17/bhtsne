@@ -35,84 +35,66 @@
 
 #include "tsne.hpp"
 #include "tuple_iter.hpp"
+#include "gdelt.hpp"
 
-typedef std::tuple<double, double, double, double, double,
-                   double, double, double, double, double> Double10;
+template<std::size_t S>
+struct read_cell { void operator()(GDELTMini& m, std::istream& in) {
+  in >> std::get<S>(m);
+  int last = in.get();
+  if (last != EOF && last != '\t')
+    throw std::invalid_argument("expected tab or EOF");
+}};
 
-void line_assert(const std::string& expect, bool b) {
-  if (!b) {
-    throw std::invalid_argument("Bad line parse: " + expect);
-  }
-}
-
-std::istream& operator>>(std::istream& in, Double10& d10) {
-  int last = EOF;
-  auto readtok = [&](double& x) {
-    in >> x;
-    last = in.get();
-    line_assert("expected tab or EOF", last == EOF || last == '\t');
-  };
-  for_each(d10, readtok);
+std::istream& operator>>(std::istream& in, GDELTMini& gdm) {
+  std::string line;
+  std::getline(in, line);
+  std::stringstream line_stream(line);
+  for_eachi<read_cell>(gdm, line_stream);
   return in;
 }
 
-double L2(const Double10& d1, const Double10& d2) {
-  double sq = 0;
-  for_each2(d1, d2, [&](double d1, double d2) { sq += pow(d1 - d2, 2); });
-  return sq;
+template<std::size_t I>
+struct get_dist { void operator() (GDELTMini& m1, GDELTMini& m2, double& sum) {
+  sum += std::get<I>(m1).distance(std::get<I>(m2));
 }
-
-struct Img28x28 {
-  unsigned char pixels_[28 * 28];
 };
 
-double L2(const Img28x28& i1, const Img28x28& i2) {
-  double ret = 0;
-  for (int i = 0; i < 28 * 28; ++i) {
-    double x = i1.pixels_[i] - i2.pixels_[i];
-    ret += x * x;
-  }
-  return ret;
-}
-
-namespace std {
-  template<> class tuple_size<Img28x28> {
-  public:
-    static const size_t value = 28 * 28;
-  };
+double Rho(const GDELTMini& m1, const GDELTMini& m2) {
+  double dist = 0;
+  for_eachi<get_dist>(const_cast<GDELTMini&>(m1),
+                      const_cast<GDELTMini&>(m2), dist);
+  return dist;
 }
 
 int main(int argc, const char* argv[]) {
-  if (argc != 3) {
+  if (argc != 7) {
     std::cerr << "Usage: " << argv[0]
-              << " infile outfile"
+              << " infile outfile no_dims theta perplexity rand_seed"
               << std::endl;
     return 1;
   }
 
   const char* infile = argv[1];
   const char* outfile = argv[2];
-  //  auto no_dims = stoi(argv[3]);
-  //  auto theta = stod(argv[4]);
-  //  auto perplexity = stod(argv[5]);
+  auto no_dims = stoi(argv[3]);
+  auto theta = stod(argv[4]);
+  auto perplexity = stod(argv[5]);
 
-  //  auto rand_seed = stoi(argv[6]);
-  //  if (rand_seed == 0) rand_seed = time(NULL);
-  //srand(rand_seed);
-  srand(0);
-  //  std::cout << "Using random seed " << rand_seed << std::endl;
+  auto rand_seed = stoi(argv[6]);
+  if (rand_seed == 0) rand_seed = time(NULL);
+  srand(rand_seed);
+  std::cout << "Using random seed " << rand_seed << std::endl;
 
-  TSNE<Img28x28, L2> tsne;
-  int no_dims = 0, rand_seed = 0;
-  double theta = 0, perplexity = 0;
+  TSNE<GDELTMini, Rho> tsne;
 
   try {
-    std::cout << "Loading 28x28-tuples from " << infile << "..." << std::endl;
-    auto X = tsne.load_data(infile, &theta, &perplexity, &no_dims, &rand_seed);
+    std::cout << "Loading " << std::tuple_size<GDELTMini>::value
+              << "-tuples from " << infile << "..." << std::endl;
+    auto X = tsne.load_data(infile);
 
     // Normalize
     /*
-    Img28x28 mean;
+    Double10 mean;
     for (auto& x : X)
       for_each2(mean, x, [](double& m, double& d) { m += d; });
     for_each(mean, [&](double& m) { m /= X.size(); });

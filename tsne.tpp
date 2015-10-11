@@ -447,29 +447,17 @@ double TSNE<Tuple, Distance>::randn() {
   return x;
 }
 
-namespace internal {
-template<typename Stream, typename T>
-void read(Stream& s, T* t) {
-  s.read(reinterpret_cast<char*>(t), sizeof *t);
-}
-}
-
 // Function that loads data from a t-SNE file
 // Note: this function does a malloc that should be freed elsewhere
 template<typename Tuple, double (*Distance)(const Tuple&, const Tuple&)>
-std::vector<Tuple> TSNE<Tuple, Distance>::load_data(
-    const std::string& filename, double* theta, double* perplexity,
-    int* no_dims, int* rand_seed) {
-  std::ifstream in(filename, std::ios::binary);
-  int nn, dd;
-  int *n = &nn, *d = &dd;
-  internal::read(in, n), internal::read(in, d), internal::read(in, theta);
-  internal::read(in, perplexity), internal::read(in, no_dims);
-  std::vector<Tuple> data(*n);
-  if (D != dd) bail("tuple dimensions != D");
-  for (int i = 0; i < nn; ++i) internal::read(in, &data[i]);
-  printf("Read the %i x %i data matrix successfully!\n", *n, *d);
-  *rand_seed = 0;
+std::vector<Tuple> TSNE<Tuple, Distance>::load_data(const std::string& filename) {
+  std::ifstream in(filename);
+  std::vector<Tuple> data;
+  do data.emplace_back();
+  while (in >> data.back());
+  data.pop_back();
+  std::cout << "Read the " << data.size() << " x " << D
+            << " data matrix successfully!" << std::endl;
   return data;
 }
 
@@ -484,7 +472,8 @@ void TSNE<Tuple, Distance>::save_data(const std::string& filename,
 
   int nrows = Y.size() / no_dims;
   std::cout << "Saving " << nrows << " x " << no_dims
-            << " data matrix to " << filename << std::endl;
+            << " data matrix to " << filename << ", flat binary fmt"
+            << std::endl;
 
   std::ofstream out(filename, std::ios::binary);
   int ctr = 0;

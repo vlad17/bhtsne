@@ -61,9 +61,7 @@ public:
 
   // Loads a list of tuples according to this type's template from a TSV
   // file.
-  std::vector<Tuple> load_data(
-    const std::string& filename, double* theta, double* perplexity,
-    int* no_dims, int* rand_seed);
+  std::vector<Tuple> load_data(const std::string& filename);
 
   // Saves a flattened double-matrix with no_dims dimensions in TSV format.
   void save_data(const std::string& filename, int no_dims,
