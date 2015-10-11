@@ -20,7 +20,7 @@ template<typename T>
 std::istream& operator>>(std::istream& in, DiffClass<T>& v) {
   in >> v.value_;
   int last = in.get();
-  if (last != EOF && last != '\t')
+  if (last != EOF && last != '\t' && last != '\r')
     throw std::invalid_argument("expected tab or EOF");
   return in;
 }
@@ -28,7 +28,7 @@ std::istream& operator>>(std::istream& in, DiffClass<T>& v) {
 std::istream& operator>>(std::istream& in, CategoryClass& v) {
   in >> v.value_;
   int last = in.get();
-  if (last != EOF && last != '\t')
+  if (last != EOF && last != '\t' && last != '\r')
     throw std::invalid_argument("expected tab or EOF");
   return in;
 }
