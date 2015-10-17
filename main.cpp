@@ -37,32 +37,6 @@
 #include "tuple_iter.hpp"
 #include "gdelt.hpp"
 
-template<std::size_t S>
-struct read_cell { void operator()(GDELTMini& m, std::istream& in) {
-  in >> std::get<S>(m);
-}};
-
-std::istream& operator>>(std::istream& in, GDELTMini& gdm) {
-  std::string line;
-  std::getline(in, line);
-  std::stringstream line_stream(line);
-  for_eachi<read_cell>(gdm, line_stream);
-  return in;
-}
-
-template<std::size_t I>
-struct get_dist { void operator() (GDELTMini& m1, GDELTMini& m2, double& sum) {
-  sum += std::get<I>(m1).distance(std::get<I>(m2));
-}
-};
-
-double Rho(const GDELTMini& m1, const GDELTMini& m2) {
-  double dist = 0;
-  for_eachi<get_dist>(const_cast<GDELTMini&>(m1),
-                      const_cast<GDELTMini&>(m2), dist);
-  return dist;
-}
-
 int main(int argc, const char* argv[]) {
   if (argc != 7) {
     std::cerr << "Usage: " << argv[0]

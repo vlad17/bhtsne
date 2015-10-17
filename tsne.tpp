@@ -453,9 +453,12 @@ template<typename Tuple, double (*Distance)(const Tuple&, const Tuple&)>
 std::vector<Tuple> TSNE<Tuple, Distance>::load_data(const std::string& filename) {
   std::ifstream in(filename);
   std::vector<Tuple> data;
-  do data.emplace_back();
-  while (in >> data.back());
-  data.pop_back();
+  std::string line;
+  while (std::getline(in, line)) {
+    std::stringstream sstr(line);
+    data.emplace_back();
+    in >> data.back();
+  }
   std::cout << "Read the " << data.size() << " x " << D
             << " data matrix successfully!" << std::endl;
   return data;
