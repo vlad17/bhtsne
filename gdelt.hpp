@@ -1,4 +1,5 @@
 #include <string>
+#include "tuple_iter.hpp"
 
 template<typename T>
 struct DiffClass {
@@ -59,8 +60,7 @@ struct read_cell { void operator()(GDELTMini& m, std::istream& in) {
 }};
 
 std::istream& operator>>(std::istream& in, GDELTMini& gdm) {
-  std::stringstream line_stream(line);
-  for_eachi<read_cell>(gdm, line_stream);
+  for_eachi<read_cell>(gdm, in);
   return in;
 }
 
