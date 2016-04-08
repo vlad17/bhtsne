@@ -260,7 +260,7 @@ TSNE<Tuple, Distance>::computeGaussianPerplexity(
   vector<IndexedTuple> indices;
   vector<double> distances;
   for (int n = 0; n < N; n++) {
-    if (n % 10000 == 0) {
+    if (n % (N / 10) == 0) {
       std::cout << "    - point " << n << " of " << N << std::endl;
     }
 

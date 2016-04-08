@@ -32,6 +32,7 @@
 
 #include <iostream>
 #include <string>
+#include <cmath>
 
 #include "tsne.hpp"
 #include "tuple_iter.hpp"
@@ -59,7 +60,7 @@ std::istream& operator>>(std::istream& in, Double10& d10) {
 double L2(const Double10& d1, const Double10& d2) {
   double sq = 0;
   for_each2(d1, d2, [&](double d1, double d2) { sq += pow(d1 - d2, 2); });
-  return sq;
+  return sqrt(sq);
 }
 
 struct Img28x28 {
@@ -72,7 +73,7 @@ double L2(const Img28x28& i1, const Img28x28& i2) {
     double x = i1.pixels_[i] - i2.pixels_[i];
     ret += x * x;
   }
-  return ret;
+  return sqrt(ret);
 }
 
 namespace std {
